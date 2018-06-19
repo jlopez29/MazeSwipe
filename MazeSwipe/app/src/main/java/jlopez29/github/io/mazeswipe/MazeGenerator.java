@@ -55,22 +55,6 @@ public class MazeGenerator {
         mazeView.setText(mazeBoard);
 
         Log.e("End", "is " + end);
-        Log.e("0,0","is: " + maze[0][0]);
-        Log.e("0,1","is: " + maze[0][1]);
-        Log.e("0,2","is: " + maze[0][2]);
-        Log.e("0,3","is: " + maze[0][3]);
-        Log.e("1,0","is: " + maze[1][0]);
-        Log.e("1,1","is: " + maze[1][1]);
-        Log.e("1,2","is: " + maze[1][2]);
-        Log.e("1,3","is: " + maze[1][3]);
-        Log.e("2,0","is: " + maze[2][0]);
-        Log.e("2,1","is: " + maze[2][1]);
-        Log.e("2,2","is: " + maze[2][2]);
-        Log.e("2,3","is: " + maze[2][3]);
-        Log.e("3,0","is: " + maze[3][0]);
-        Log.e("3,1","is: " + maze[3][1]);
-        Log.e("3,2","is: " + maze[3][2]);
-        Log.e("3,3","is: " + maze[3][3]);
 
     }
 
