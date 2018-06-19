@@ -30,7 +30,7 @@ public class GameScreen extends AppCompatActivity {
         generate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                MazeGenerator mg = new MazeGenerator(3,3);
+                MazeGenerator mg = new MazeGenerator(4,4);
                 mg.display();
             }
         });
