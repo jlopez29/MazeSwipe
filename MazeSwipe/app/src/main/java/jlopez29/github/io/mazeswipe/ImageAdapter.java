@@ -14,28 +14,31 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 import static jlopez29.github.io.mazeswipe.GameScreen.mazeSize;
+import static jlopez29.github.io.mazeswipe.GameScreen.visitedDrawables;
+import static jlopez29.github.io.mazeswipe.GameScreen.x;
+import static jlopez29.github.io.mazeswipe.GameScreen.y;
 
 public class ImageAdapter extends BaseAdapter {
-    ArrayList<Integer> imageList;
+    Integer[] imageList;
     Context context;
-    public ImageAdapter(Context ctx,ArrayList<Integer> iconImages ) {
+    public ImageAdapter(Context ctx,Integer[] iconImages ) {
         context = ctx;
         imageList = iconImages;
     }
 
     @Override
     public int getCount() {
-        return imageList.size();
+        return mazeSize*mazeSize;
     }
 
     @Override
     public Object getItem(int position) {
-        return null;
+        return position;
     }
 
     @Override
     public long getItemId(int position) {
-        return 0;
+        return position;
     }
 
     public class Holder
@@ -45,8 +48,17 @@ public class ImageAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View rowView, ViewGroup parent) {
 
+        Log.e("Pos","is " + position);
+
         ImageView iv = new ImageView(context);
-        iv.setImageDrawable(context.getResources().getDrawable(R.drawable.circle,null));
+//        if(visited[position] == 1)
+        iv.setImageDrawable(context.getResources().getDrawable(visitedDrawables[position],null));
+//        else if(visited[position] == 0)
+//            iv.setImageDrawable(context.getResources().getDrawable(R.drawable.circle,null));
+//        else
+//            iv.setImageDrawable(context.getResources().getDrawable(R.drawable.circle_curr,null));
+
         return iv;
     }
+
 }

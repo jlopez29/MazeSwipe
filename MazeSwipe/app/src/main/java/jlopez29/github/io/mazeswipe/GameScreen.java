@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -17,6 +18,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.GridView;
 import android.widget.RelativeLayout;
@@ -38,18 +40,20 @@ public class GameScreen extends AppCompatActivity {
     public static Integer mazeSize = 4;
 
     ArrayList<Integer> imageList;
-    Integer[] drawables;
+    Integer[][] drawables;
+
+    GridView gv;
 
     int[][] maze;
     boolean finished = false;
-    ArrayList<String> pos;
-    int x = 0;
-    int y = 0;
+    public static Integer[] visitedDrawables;
+    public static int x = 0;
+    public static int y = 0;
 
     int tx = 0;
     int ty = 0;
 
-    private float downX,downY,upX,upY;
+    private float downX, downY, upX, upY;
     static final int MIN_DISTANCE = 150;
 
     RelativeLayout N;
@@ -73,7 +77,11 @@ public class GameScreen extends AppCompatActivity {
     String endPoint = "";
 
     Button generate;
+    FloatingActionButton fab;
     Context mCtx;
+
+    ImageAdapter ia;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -83,26 +91,78 @@ public class GameScreen extends AppCompatActivity {
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
         mCtx = this;
         mazeView = findViewById(R.id.mazeView);
+        String size = prefs.getString("mzSize", "4");
+        mazeSize = Integer.valueOf(size);
 
         initLayouts();
 
         generate = findViewById(R.id.generateMap);
 
+        gv = findViewById(R.id.gridView);
+
+        fab = findViewById(R.id.help);
+
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(gv.getVisibility() == View.VISIBLE) {
+                    gv.setVisibility(View.GONE);
+                    fab.show();
+                    fab.setClickable(true);
+                }
+                else
+                {
+                    gv.setVisibility(View.VISIBLE);
+                    fab.hide();
+                    fab.setClickable(false);
+                }
+            }
+        });
+
+        gv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                if(gv.getVisibility() == View.VISIBLE) {
+                    gv.setVisibility(View.GONE);
+                    fab.show();
+                    fab.setClickable(true);
+                }
+                else
+                {
+                    gv.setVisibility(View.VISIBLE);
+                    fab.hide();
+                    fab.setClickable(false);
+                }
+            }
+        });
 
         generate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String size = prefs.getString("mzSize","4");
+                String size = prefs.getString("mzSize", "4");
                 mazeSize = Integer.valueOf(size);
+
+                initVisited();
+
+                initGrid();
+
+                visitedDrawables[0] = R.drawable.circle_curr;
+
+                ia = new ImageAdapter(mCtx, visitedDrawables);
+                gv.setNumColumns(mazeSize);
+                gv.setAdapter(ia);
+
                 mg = new MazeGenerator(mazeSize, mazeSize);
                 maze = mg.getMaze();
-//                pos = new ArrayList<>();
-//                pos.add("00");
+
+                drawables[0][0] = R.drawable.circle_curr;
+
                 endPoint = mg.getEnd();
                 finished = false;
                 generate.setVisibility(View.GONE);
                 generate.setClickable(false);
                 mazeView.setVisibility(View.GONE);
+                fab.setVisibility(View.VISIBLE);
 
                 mg.display();
                 gameLoop();
@@ -117,6 +177,31 @@ public class GameScreen extends AppCompatActivity {
         super.onDestroy();
     }
 
+    public void initGrid() {
+        Log.i("Init", "Grid");
+        drawables = new Integer[mazeSize][mazeSize];
+        for (int i = 0; i < mazeSize; i++) {
+            for (int j = 0; j < mazeSize; j++) {
+                drawables[i][j] = R.drawable.circle;
+            }
+        }
+    }
+
+    public void initVisited() {
+        visitedDrawables = new Integer[mazeSize*mazeSize];
+        for (int i = 0; i < mazeSize * mazeSize; i++) {
+            visitedDrawables[i] = R.drawable.circle;
+        }
+    }
+
+    public int getGridPos(int mx,int my)
+    {
+        int spot = 0;
+
+        spot = my*mazeSize + mx;
+
+        return spot;
+    }
 
     @Override
     protected void onNewIntent(Intent intent) {
@@ -139,8 +224,15 @@ public class GameScreen extends AppCompatActivity {
                     ty = y;
                     if (validMove(1)) {
                         Log.e("Valid", "Move");
+                        int pos = getGridPos(x,y);
+                        Log.e("Pos", "is " + pos);
+                        visitedDrawables[pos] = R.drawable.circle_dark;
                         x = tx;
                         y = ty;
+                        pos = getGridPos(x,y);
+                        visitedDrawables[pos] = R.drawable.circle_curr;
+
+                        ia.notifyDataSetChanged();
                         gameLoop();
                     }
                 } else if (dir.equals("D")) {
@@ -150,8 +242,15 @@ public class GameScreen extends AppCompatActivity {
                     ty = y;
                     if (validMove(2)) {
                         Log.e("Valid", "Move");
+                        int pos = getGridPos(x,y);
+                        Log.e("Pos", "is " + pos);
+                        visitedDrawables[pos] = R.drawable.circle_dark;
                         x = tx;
                         y = ty;
+                        pos = getGridPos(x,y);
+                        visitedDrawables[pos] = R.drawable.circle_curr;
+
+                        ia.notifyDataSetChanged();
                         gameLoop();
                     }
                 } else if (dir.equals("B")) {
@@ -161,8 +260,15 @@ public class GameScreen extends AppCompatActivity {
                     ty = y + 1;
                     if (validMove(3)) {
                         Log.e("Valid", "Move");
+                        int pos = getGridPos(x,y);
+                        Log.e("Pos", "is " + pos);
+                        visitedDrawables[pos] = R.drawable.circle_dark;
                         x = tx;
                         y = ty;
+                        pos = getGridPos(x,y);
+                        visitedDrawables[pos] = R.drawable.circle_curr;
+
+                        ia.notifyDataSetChanged();
                         gameLoop();
                     }
                 } else if (dir.equals("A")) {
@@ -172,8 +278,15 @@ public class GameScreen extends AppCompatActivity {
                     ty = y - 1;
                     if (validMove(4)) {
                         Log.e("Valid", "Move");
+                        int pos = getGridPos(x,y);
+                        Log.e("Pos", "is " + pos);
+                        visitedDrawables[pos] = R.drawable.circle_dark;
                         x = tx;
                         y = ty;
+                        pos = getGridPos(x,y);
+                        visitedDrawables[pos] = R.drawable.circle_curr;
+
+                        ia.notifyDataSetChanged();
                         gameLoop();
                     }
                 }
@@ -204,6 +317,8 @@ public class GameScreen extends AppCompatActivity {
             x = 0;
             y = 0;
             finished = false;
+            gv.setVisibility(View.GONE);
+            fab.setVisibility(View.GONE);
             hideAll();
         }
     }
@@ -276,9 +391,16 @@ public class GameScreen extends AppCompatActivity {
                             ty = y;
                             if(validMove(1))
                             {
-                                Log.e("Valid","Move");
+                                Log.e("Valid", "Move");
+                                int pos = getGridPos(x,y);
+                                Log.e("Pos", "is " + pos);
+                                visitedDrawables[pos] = R.drawable.circle_dark;
                                 x = tx;
                                 y = ty;
+                                pos = getGridPos(x,y);
+                                visitedDrawables[pos] = R.drawable.circle_curr;
+
+                                ia.notifyDataSetChanged();
                                 gameLoop();
                                 return true;
                             }
@@ -292,9 +414,16 @@ public class GameScreen extends AppCompatActivity {
                             ty = y;
                             if(validMove(2))
                             {
-                                Log.e("Valid","Move");
+                                Log.e("Valid", "Move");
+                                int pos = getGridPos(x,y);
+                                Log.e("Pos", "is " + pos);
+                                visitedDrawables[pos] = R.drawable.circle_dark;
                                 x = tx;
                                 y = ty;
+                                pos = getGridPos(x,y);
+                                visitedDrawables[pos] = R.drawable.circle_curr;
+
+                                ia.notifyDataSetChanged();
                                 gameLoop();
                                 return true;
                             }
@@ -318,9 +447,16 @@ public class GameScreen extends AppCompatActivity {
                             ty = y+1;
                             if(validMove(3))
                             {
-                                Log.e("Valid","Move");
+                                Log.e("Valid", "Move");
+                                int pos = getGridPos(x,y);
+                                Log.e("Pos", "is " + pos);
+                                visitedDrawables[pos] = R.drawable.circle_dark;
                                 x = tx;
                                 y = ty;
+                                pos = getGridPos(x,y);
+                                visitedDrawables[pos] = R.drawable.circle_curr;
+
+                                ia.notifyDataSetChanged();
                                 gameLoop();
                                 return true;
                             }
@@ -334,9 +470,16 @@ public class GameScreen extends AppCompatActivity {
                             ty = y-1;
                             if(validMove(4))
                             {
-                                Log.e("Valid","Move");
+                                Log.e("Valid", "Move");
+                                int pos = getGridPos(x,y);
+                                Log.e("Pos", "is " + pos);
+                                visitedDrawables[pos] = R.drawable.circle_dark;
                                 x = tx;
                                 y = ty;
+                                pos = getGridPos(x,y);
+                                visitedDrawables[pos] = R.drawable.circle_curr;
+
+                                ia.notifyDataSetChanged();
                                 gameLoop();
                                 return true;
                             }

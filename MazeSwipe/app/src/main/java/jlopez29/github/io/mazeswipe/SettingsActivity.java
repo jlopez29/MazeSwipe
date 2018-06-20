@@ -7,6 +7,7 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 
 public class SettingsActivity extends AppCompatActivity {
     @Override
@@ -31,7 +32,12 @@ public class SettingsActivity extends AppCompatActivity {
 
         @Override
         public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
-
+            Log.e("Key","is " + key);
+            if(key.equals("mzSize"))
+            {
+                Log.e("Update","size " + prefs.getString(key,"4"));
+                prefs.edit().putString("mzSize",prefs.getString(key,"4")).apply();
+            }
         }
 
         @Override
