@@ -24,6 +24,16 @@ public class MazeGenerator {
         generateMaze(0, 0);
     }
 
+    public int[][] getMaze()
+    {
+        return maze;
+    }
+
+    public String getEnd()
+    {
+        return end;
+    }
+
     public void display() {
         String mazeBoard = "";
         for (int i = 0; i < y; i++) {
@@ -67,7 +77,7 @@ public class MazeGenerator {
             if (between(nx, x) && between(ny, y) && (maze[nx][ny] == 0)) {
                 maze[cx][cy] |= dir.bit;
                 maze[nx][ny] |= dir.opposite.bit;
-                end = nx + ", " + ny;
+                end = nx + "" + ny;
                 generateMaze(nx, ny);
             }
         }
