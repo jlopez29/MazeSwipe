@@ -1,9 +1,13 @@
 package jlopez29.github.io.mazeswipe;
 
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -14,11 +18,14 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.GridView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -28,7 +35,10 @@ public class GameScreen extends AppCompatActivity {
 
     public static TextView mazeView;
     SharedPreferences prefs;
-    Integer mazeSize = 4;
+    public static Integer mazeSize = 4;
+
+    ArrayList<Integer> imageList;
+    Integer[] drawables;
 
     int[][] maze;
     boolean finished = false;
@@ -63,7 +73,7 @@ public class GameScreen extends AppCompatActivity {
     String endPoint = "";
 
     Button generate;
-
+    Context mCtx;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,12 +81,13 @@ public class GameScreen extends AppCompatActivity {
         setContentView(R.layout.activity_game_screen);
 
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
-
-        mazeView = (TextView) findViewById(R.id.mazeView);
+        mCtx = this;
+        mazeView = findViewById(R.id.mazeView);
 
         initLayouts();
 
-        generate = (Button) findViewById(R.id.generateMap);
+        generate = findViewById(R.id.generateMap);
+
 
         generate.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -92,6 +103,7 @@ public class GameScreen extends AppCompatActivity {
                 generate.setVisibility(View.GONE);
                 generate.setClickable(false);
                 mazeView.setVisibility(View.GONE);
+
                 mg.display();
                 gameLoop();
 
@@ -99,6 +111,76 @@ public class GameScreen extends AppCompatActivity {
         });
 
     }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
+
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        Bundle extras = intent.getExtras();
+        String dir = "";
+
+        if (extras != null)
+        {
+            if (extras.containsKey("Btext"))
+                dir = extras.getString("Btext");
+
+            if (dir != null)
+            {
+
+                if (dir.equals("E")) {
+
+                    Log.e("Left", "to Right");
+                    //left to right
+                    tx = x + 1;
+                    ty = y;
+                    if (validMove(1)) {
+                        Log.e("Valid", "Move");
+                        x = tx;
+                        y = ty;
+                        gameLoop();
+                    }
+                } else if (dir.equals("D")) {
+                    // left
+                    Log.e("Right", "to Left");
+                    tx = x - 1;
+                    ty = y;
+                    if (validMove(2)) {
+                        Log.e("Valid", "Move");
+                        x = tx;
+                        y = ty;
+                        gameLoop();
+                    }
+                } else if (dir.equals("B")) {
+                    // top to bottom
+                    Log.e("Top", "to Bottom");
+                    tx = x;
+                    ty = y + 1;
+                    if (validMove(3)) {
+                        Log.e("Valid", "Move");
+                        x = tx;
+                        y = ty;
+                        gameLoop();
+                    }
+                } else if (dir.equals("A")) {
+                    // top
+                    Log.e("Bottom", "to Top");
+                    tx = x;
+                    ty = y - 1;
+                    if (validMove(4)) {
+                        Log.e("Valid", "Move");
+                        x = tx;
+                        y = ty;
+                        gameLoop();
+                    }
+                }
+            }
+        }
+    }
+
 
     public void gameLoop()
     {
@@ -119,6 +201,8 @@ public class GameScreen extends AppCompatActivity {
             updateDisplay();
         else
         {
+            x = 0;
+            y = 0;
             finished = false;
             hideAll();
         }

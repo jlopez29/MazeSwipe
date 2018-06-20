@@ -10,6 +10,17 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <GridView
+            android:id="@+id/gridView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:numColumns="4"
+            android:clipToPadding="false"
+            android:gravity="center"
+            android:visibility="gone"
+            android:background="@color/colorPrimary"
+            android:layout_centerInParent="true"/>
+
 
         <RelativeLayout
             android:id="@+id/N"

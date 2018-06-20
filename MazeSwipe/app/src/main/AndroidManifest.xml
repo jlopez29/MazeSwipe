@@ -28,6 +28,13 @@
             >
         </activity>
 
+        <receiver android:name=".MyBroadcastReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="jlopez29.github.io.mazeswipe.buttonpress" />
+            </intent-filter>
+        </receiver>
 
     </application>
 
